@@ -1,14 +1,10 @@
-# torch/torchaudio are pinned: torchaudio 2.9+ changed audio I/O and breaks demucs 4.0.1.
-# The Dockerfile installs the CPU wheels first; locally, pip will pick whatever fits your machine.
-torch==2.5.1
-torchaudio==2.5.1
-demucs==4.0.1
-numpy<2
-
-streamlit>=1.37
-plotly>=5.20
-pandas>=2.0
-supabase>=2.4
-pydub>=0.25.1
-requests>=2.31
+streamlit
+supabase
+demucs
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch
+torchaudio
+plotly
+pydub
 yt-dlp
+audioop-lts
