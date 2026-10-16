@@ -118,9 +118,9 @@ with tabs[0]:
         
         input_type = st.radio("Source Type:", ["Direct Audio URL", "Upload Audio File"], horizontal=True)
         
-        if input_type == "Direct Audio URL":
+       if input_type == "Direct Audio URL":
             song_url = st.text_input(
-                "Enter Audio Link (MP3/WAV URL):", 
+                "Enter Audio Link (MP3/WAV/YouTube URL):", 
                 value="https://server8.mp3quran.net/afs/055.mp3"
             )
             if st.button("⚡ Process & Dampen Music", type="primary"):
@@ -132,7 +132,8 @@ with tabs[0]:
                             st.audio(processed_bytes, format="audio/mp3")
                             st.session_state["active_cleansed_audio"] = processed_bytes
                         else:
-                            st.error("Failed to process the audio stream. Please check the URL.")
+                            st.warning("⚠️ Could not extract streaming audio from that URL. YouTube often blocks cloud server IPs.")
+                            st.info("💡 **Recommended fix:** Select 'Upload Audio File' above to process your MP3/WAV file directly, or try a direct audio link (.mp3/.wav).")
                 else:
                     st.warning("Please provide a valid audio URL.")
         else:
@@ -164,7 +165,7 @@ with tabs[0]:
             st.info("Using your newly cleansed track from the previous step.")
             
         render_mixer(source=mixer_input)
-        
+
 # TAB 2: Context-Aware Audio Replacements
 with tabs[1]:
     st.subheader("🎧 Context-Aware Audio Replacements")
