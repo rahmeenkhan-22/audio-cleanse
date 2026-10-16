@@ -5,21 +5,16 @@ import streamlit as st
 def render_analytics(db, user_id="00000000-0000-0000-0000-000000000000"):
     st.subheader("📊 Your Recovery & Craving Analytics")
     
-    logs = []
-    # Safe fetch from Supabase to handle connection drops gracefully
-    try:
-        response = db.client.table("mood_logs").select("*").eq("user_id", user_id).order("created_at").execute()
-        logs = response.data or []
-    except Exception as e:
-        st.warning("⚠️ Database connection timed out. Please refresh the page or try logging your entry again.")
-        return
+    # Use the safe DatabaseManager method
+    logs = db.fetch_mood_logs(user_id=user_id)
 
     if not logs:
-        st.info("No craving logs found yet! Use the 'Daily Craving & Mood Log' panel on the sidebar to log your first entry.")
+        st.info("Log your daily mood in the sidebar to generate graphs!")
         return
 
     df = pd.DataFrame(logs)
-    df['created_at'] = pd.to_datetime(df['created_at'])
+    if 'created_at' in df.columns:
+        df['created_at'] = pd.to_datetime(df['created_at'])
 
     # Key Summary Metrics
     col1, col2, col3, col4 = st.columns(4)
@@ -36,12 +31,12 @@ def render_analytics(db, user_id="00000000-0000-0000-0000-000000000000"):
 
     st.divider()
 
-    # Charts
+    # Interactive Plotly Charts
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
         st.markdown("### 📈 Craving Intensity Trend")
-        if 'craving_score' in df.columns:
+        if 'craving_score' in df.columns and 'created_at' in df.columns:
             fig_line = px.line(
                 df, 
                 x='created_at', 
@@ -66,3 +61,6 @@ def render_analytics(db, user_id="00000000-0000-0000-0000-000000000000"):
                 hole=0.4
             )
             st.plotly_chart(fig_pie, use_container_width=True)
+
+# Function alias so imports in app.py work without error
+render_mood_analytics = render_analytics
