@@ -5,13 +5,14 @@ import streamlit as st
 def render_analytics(db, user_id="00000000-0000-0000-0000-000000000000"):
     st.subheader("📊 Your Recovery & Craving Analytics")
     
-    # Fetch user mood logs from Supabase
+    logs = []
+    # Safe fetch from Supabase to handle connection drops gracefully
     try:
         response = db.client.table("mood_logs").select("*").eq("user_id", user_id).order("created_at").execute()
-        logs = response.data
+        logs = response.data or []
     except Exception as e:
-        st.error(f"Failed to fetch mood logs: {e}")
-        logs = []
+        st.warning("⚠️ Database connection timed out. Please refresh the page or try logging your entry again.")
+        return
 
     if not logs:
         st.info("No craving logs found yet! Use the 'Daily Craving & Mood Log' panel on the sidebar to log your first entry.")
@@ -35,7 +36,7 @@ def render_analytics(db, user_id="00000000-0000-0000-0000-000000000000"):
 
     st.divider()
 
-    # Interactive Plotly Charts
+    # Charts
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
@@ -65,5 +66,3 @@ def render_analytics(db, user_id="00000000-0000-0000-0000-000000000000"):
                 hole=0.4
             )
             st.plotly_chart(fig_pie, use_container_width=True)
-# Alias so both function names work seamlessly in app.py
-render_mood_analytics = render_analytics            
