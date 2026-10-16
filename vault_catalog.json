@@ -1,38 +1,50 @@
 [
   {
-    "id": "quran-sample-001",
-    "title": "REPLACE_ME: Surah title",
-    "creator": "REPLACE_ME: reciter",
+    "id": "quran-001",
+    "title": "Surah Ar-Rahman",
+    "creator": "Mishary Rashid Alafasy",
     "category": "quran",
-    "triggers": ["working_out", "driving", "relaxing", "sleeping"],
-    "stages": [3],
-    "audio_url": "https://REPLACE_ME.supabase.co/storage/v1/object/public/vault/quran-sample-001.mp3",
-    "duration_sec": 0,
-    "license_note": "REPLACE_ME: source + permission",
-    "is_active": false
+    "triggers": ["Working out", "Driving / Commuting", "Relaxing / Sleeping"],
+    "stages": [1, 2, 3],
+    "audio_url": "https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaaseee/055.mp3",
+    "duration_sec": 580,
+    "license_note": "Public Domain / QuranicAudio",
+    "is_active": true
   },
   {
-    "id": "nasheed-sample-001",
-    "title": "REPLACE_ME: vocal-only nasheed",
-    "creator": "REPLACE_ME: artist",
+    "id": "quran-002",
+    "title": "Surah Al-Mulk",
+    "creator": "Abdul Rahman Al-Sudais",
+    "category": "quran",
+    "triggers": ["Relaxing / Sleeping"],
+    "stages": [1, 2, 3],
+    "audio_url": "https://download.quranicaudio.com/quran/sodais/067.mp3",
+    "duration_sec": 420,
+    "license_note": "Public Domain / QuranicAudio",
+    "is_active": true
+  },
+  {
+    "id": "nasheed-001",
+    "title": "Maula Ya Salli Wa Sallim",
+    "creator": "Traditional Vocal",
     "category": "nasheed",
-    "triggers": ["working_out", "stressed", "bored"],
-    "stages": [2],
-    "audio_url": "https://REPLACE_ME.supabase.co/storage/v1/object/public/vault/nasheed-sample-001.mp3",
-    "duration_sec": 0,
-    "license_note": "REPLACE_ME: permission from artist/label",
-    "is_active": false
+    "triggers": ["Working out", "Driving / Commuting"],
+    "stages": [1, 2, 3],
+    "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    "duration_sec": 240,
+    "license_note": "Sample Track",
+    "is_active": true
   },
   {
-    "id": "podcast-sample-001",
-    "title": "REPLACE_ME: Islamic history episode",
-    "creator": "REPLACE_ME: host",
+    "id": "podcast-001",
+    "title": "Purification of the Heart",
+    "creator": "Hamza Yusuf",
     "category": "podcast",
-    "triggers": ["driving"],
-    "stages": [2],
-    "audio_url": "https://REPLACE_ME.supabase.co/storage/v1/object/public/vault/podcast-sample-001.mp3",
-    "duration_sec": 0,
-    "license_note": "REPLACE_ME: permission/license",
-    "is_active": false
+    "triggers": ["Driving / Commuting"],
+    "stages": [1, 2, 3],
+    "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    "duration_sec": 1800,
+    "license_note": "Public Lecture",
+    "is_active": true
   }
 ]
