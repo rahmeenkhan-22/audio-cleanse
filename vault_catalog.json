@@ -6,9 +6,9 @@
     "category": "quran",
     "triggers": ["Working out", "Driving / Commuting", "Relaxing / Sleeping"],
     "stages": [1, 2, 3],
-    "audio_url": "https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaaseee/055.mp3",
+    "audio_url": "https://server8.mp3quran.net/afs/055.mp3",
     "duration_sec": 580,
-    "license_note": "Public Domain / QuranicAudio",
+    "license_note": "Public Domain",
     "is_active": true
   },
   {
@@ -18,9 +18,9 @@
     "category": "quran",
     "triggers": ["Relaxing / Sleeping"],
     "stages": [1, 2, 3],
-    "audio_url": "https://download.quranicaudio.com/quran/sodais/067.mp3",
+    "audio_url": "https://server11.mp3quran.net/sds/067.mp3",
     "duration_sec": 420,
-    "license_note": "Public Domain / QuranicAudio",
+    "license_note": "Public Domain",
     "is_active": true
   },
   {
@@ -30,9 +30,9 @@
     "category": "nasheed",
     "triggers": ["Working out", "Driving / Commuting"],
     "stages": [1, 2, 3],
-    "audio_url": "https://download.quranicaudio.com/quran/abu_bakr_ash-shaatree/018.mp3",
+    "audio_url": "https://server11.mp3quran.net/shatri/018.mp3",
     "duration_sec": 1400,
-    "license_note": "Public Domain / QuranicAudio",
+    "license_note": "Public Domain",
     "is_active": true
   },
   {
@@ -42,9 +42,9 @@
     "category": "podcast",
     "triggers": ["Driving / Commuting"],
     "stages": [1, 2, 3],
-    "audio_url": "https://download.quranicaudio.com/quran/maher_al_muaiqly/036.mp3",
+    "audio_url": "https://server12.mp3quran.net/maher/036.mp3",
     "duration_sec": 720,
-    "license_note": "Public Domain / QuranicAudio",
+    "license_note": "Public Domain",
     "is_active": true
   }
 ]
