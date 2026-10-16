@@ -1,4 +1,5 @@
 import streamlit as st
+import vault
 import pandas as pd
 import time
 from database import DatabaseManager
@@ -132,16 +133,33 @@ with tabs[1]:
     st.subheader("🎧 Context-Aware Audio Replacements")
     activity = st.selectbox("What are you doing right now?", ["Working out", "Driving / Commuting", "Relaxing / Sleeping"])
     
-    if activity == "Working out":
-        st.markdown("**Recommended:** High-Energy Quran Recitations & Vocal Nasheeds")
-        st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-    elif activity == "Driving / Commuting":
-        st.markdown("**Recommended:** Islamic History Podcasts & Tafseer Lectures")
-        st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3")
+    # Map activity to vault category
+    category_map = {
+        "Working out": "Nasheed",
+        "Driving / Commuting": "Lectures",
+        "Relaxing / Sleeping": "Quran"
+    }
+    
+    selected_category = category_map[activity]
+    st.markdown(f"**Recommended for {activity}:** ({selected_category} Selection)")
+    
+    # Load tracks from Vault
+    vault_tracks = vault.load_vault(db, category=selected_category)
+    
+    if vault_tracks:
+        for track in vault_tracks:
+            with st.container(border=True):
+                st.write(f"**{track.get('title', 'Untitled')}** — {track.get('reciter_artist', 'Unknown')}")
+                st.audio(track.get('audio_url'))
     else:
-        st.markdown("**Recommended:** Soft Ruqyah Recitations & Evening Adhkar")
-        st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3")
-
+        st.info("No pre-loaded tracks found for this category yet. Showing default recommendations:")
+        if activity == "Working out":
+            st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+        elif activity == "Driving / Commuting":
+            st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3")
+        else:
+            st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3")
+            
 with tabs[2]:
     st.subheader("📊 Your Craving & Mood Progress")
     try:
