@@ -9,3 +9,4 @@ pydub
 yt-dlp
 audioop-lts
 scipy
+requests
