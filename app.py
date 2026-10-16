@@ -61,11 +61,10 @@ with st.sidebar:
         
         if submitted:
             # Standard test user UUID for local testing
-        db.log_mood(
+            db.log_mood(
     craving_score=craving,
     trigger_context=context,
-    emotional_state=emotion,
-    day_number=journey_day
+    emotional_state=emotion
 )
             st.success("Mood log saved!")
 
