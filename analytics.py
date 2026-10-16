@@ -65,3 +65,5 @@ def render_analytics(db, user_id="00000000-0000-0000-0000-000000000000"):
                 hole=0.4
             )
             st.plotly_chart(fig_pie, use_container_width=True)
+# Alias so both function names work seamlessly in app.py
+render_mood_analytics = render_analytics            

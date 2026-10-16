@@ -4,7 +4,7 @@ import pandas as pd
 import time
 from database import DatabaseManager
 from audio_processor import AudioProcessor
-from analytics import render_mood_analytics
+import analytics
 from ui_components import render_mixer, pause_and_reflect, reset_pause
 
 # Page Configuration
