@@ -103,62 +103,68 @@ tabs = st.tabs(
 with tabs[0]:
     st.subheader("🎵 Audio Cleanse Processing Engine")
     
-    input_type = st.radio("Input Source:", ["YouTube URL", "Upload Audio File"], horizontal=True)
+    # 1. Clear Operation Mode Selector
+    engine_mode = st.radio(
+        "Choose Operation Mode:",
+        ["🎼 Convert / Remove Instrumental Music", "🎛️ Ambient Soundscape Mixer"],
+        horizontal=True
+    )
     
     st.divider()
     
-    processed_url = None
-    
-    if input_type == "YouTube URL":
-        yt_url = st.text_input("Enter YouTube Video / Audio Link:", placeholder="https://www.youtube.com/watch?v=...")
+    if engine_mode == "🎼 Convert / Remove Instrumental Music":
+        st.markdown("### Remove or Filter Instrumental Music")
+        st.caption("Submit an audio link or file to apply stage-based frequency dampening.")
         
-        if st.button("⚡ Extract Vocals & Cleanse Track", type="primary"):
-            if yt_url:
-                with st.spinner("Extracting vocal stems..."):
-                    try:
-                        result = processor.process_yt_url(yt_url)
-                        if result and "storage_url" in result:
-                            processed_url = result["storage_url"]
-                            st.success(f"Track processed successfully: **{result.get('title', 'YouTube Track')}**")
-                            st.session_state["active_cleansed_audio"] = processed_url
-                    except Exception as e:
-                        if "403" in str(e) or "Forbidden" in str(e):
-                            st.warning("⚠️ YouTube blocked direct audio extraction from cloud servers. Please upload an MP3 file directly using the 'Upload Audio File' tab, or test with a pre-cached sample.")
-                            st.session_state["active_cleansed_audio"] = "https://server8.mp3quran.net/afs/055.mp3"
+        input_type = st.radio("Source Type:", ["Direct Audio URL", "Upload Audio File"], horizontal=True)
+        
+        if input_type == "Direct Audio URL":
+            song_url = st.text_input(
+                "Enter Audio Link (MP3/WAV URL):", 
+                value="https://server8.mp3quran.net/afs/055.mp3"
+            )
+            if st.button("⚡ Process & Dampen Music", type="primary"):
+                if song_url:
+                    with st.spinner(f"Filtering instrumental frequencies for Stage {stage_num}..."):
+                        processed_bytes = processor.process_track(song_url, stage=stage_num)
+                        if processed_bytes:
+                            st.success(f"Processing complete for Stage {stage_num}!")
+                            st.audio(processed_bytes, format="audio/mp3")
+                            st.session_state["active_cleansed_audio"] = processed_bytes
                         else:
-                            st.error(f"Processing failed: {e}")
-            else:
-                st.warning("Please enter a valid YouTube URL.")
+                            st.error("Failed to process the audio stream. Please check the URL.")
+                else:
+                    st.warning("Please provide a valid audio URL.")
+        else:
+            uploaded_file = st.file_uploader("Upload Audio File (MP3/WAV/M4A):", type=["mp3", "wav", "m4a"])
+            if st.button("⚡ Process Uploaded File", type="primary"):
+                if uploaded_file:
+                    with st.spinner(f"Filtering instrumental frequencies for Stage {stage_num}..."):
+                        processed_bytes = processor.process_track(uploaded_file.getvalue(), stage=stage_num)
+                        if processed_bytes:
+                            st.success(f"Processing complete for Stage {stage_num}!")
+                            st.audio(processed_bytes, format="audio/mp3")
+                            st.session_state["active_cleansed_audio"] = processed_bytes
+                        else:
+                            st.error("Failed to process the uploaded file.")
+                else:
+                    st.warning("Please upload an audio file first.")
 
     else:
-        uploaded_file = st.file_uploader("Upload an MP3/WAV file:", type=["mp3", "wav", "m4a"])
+        st.markdown("### Ambient Soundscape Layering")
+        st.caption("Add background soundscapes (rain, nature, ambient noise) over your audio.")
         
-        if st.button("⚡ Extract Vocals & Cleanse File", type="primary"):
-            if uploaded_file:
-                with st.spinner("Separating vocal stems via Demucs..."):
-                    try:
-                        file_bytes = uploaded_file.getvalue()
-                        result = processor.process_audio(file_bytes, uploaded_file.name)
-                        if result and "storage_url" in result:
-                            processed_url = result["storage_url"]
-                            st.success(f"Vocal stem extracted successfully: **{result.get('title')}**")
-                            st.session_state["active_cleansed_audio"] = processed_url
-                    except Exception as e:
-                        st.error(f"Processing error: {e}")
-            else:
-                st.warning("Please upload an audio file first.")
-
-    # Render playback if track is processed or stored in session state
-    active_audio = st.session_state.get("active_cleansed_audio")
-    if active_audio:
-        st.divider()
-        st.markdown("### 🎧 Cleansed Vocal Stream")
-        st.audio(active_audio)
+        # Use previously cleansed audio if available, otherwise default sample
+        default_source = st.session_state.get("active_cleansed_audio", "https://server8.mp3quran.net/afs/055.mp3")
         
-        st.divider()
-        st.markdown("### 🎛️ Layer Ambient Soundscape")
-        render_mixer(source=active_audio)
-
+        if isinstance(default_source, str):
+            mixer_input = st.text_input("Audio Source for Mixing:", value=default_source)
+        else:
+            mixer_input = default_source
+            st.info("Using your newly cleansed track from the previous step.")
+            
+        render_mixer(source=mixer_input)
+        
 # TAB 2: Context-Aware Audio Replacements
 with tabs[1]:
     st.subheader("🎧 Context-Aware Audio Replacements")
