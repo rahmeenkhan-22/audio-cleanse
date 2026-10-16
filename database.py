@@ -67,3 +67,28 @@ class DatabaseManager:
 def get_db() -> DatabaseManager:
     """Cached singleton instance of DatabaseManager to prevent re-instantiating connections on every rerun."""
     return DatabaseManager()
+
+def get_cached_audio(self, file_hash: str):
+    """Retrieve existing processed track URL from Supabase cache table."""
+    if not self.is_connected:
+        return None
+    try:
+        res = self.client.table("audio_cache").select("*").eq("file_hash", file_hash).execute()
+        return res.data[0] if res.data else None
+    except Exception:
+        return None
+
+def save_audio_cache(self, file_hash: str, track_title: str, storage_url: str):
+    """Save processed track details to Supabase audio_cache table."""
+    if not self.is_connected:
+        return False
+    try:
+        payload = {
+            "file_hash": file_hash,
+            "track_title": track_title,
+            "storage_url": storage_url
+        }
+        self.client.table("audio_cache").insert(payload).execute()
+        return True
+    except Exception:
+        return False

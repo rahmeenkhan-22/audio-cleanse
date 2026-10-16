@@ -103,48 +103,59 @@ tabs = st.tabs(
 with tabs[0]:
     st.subheader("🎵 Audio Cleanse Processing Engine")
     
-    # Mode selection for user workflow
-    engine_mode = st.radio(
-        "Choose Operation:",
-        ["🎼 Convert / Remove Instrumental Music", "🎛️ Ambient Soundscape Mixer"],
-        horizontal=True
-    )
+    input_type = st.radio("Input Source:", ["YouTube URL", "Upload Audio File"], horizontal=True)
     
     st.divider()
     
-    if engine_mode == "🎼 Convert / Remove Instrumental Music":
-        st.markdown("### Remove or Dampen Instrumental Music")
-        st.caption("Submit a song link to isolate vocals or apply stage-based frequency dampening.")
+    processed_url = None
+    
+    if input_type == "YouTube URL":
+        yt_url = st.text_input("Enter YouTube Video / Audio Link:", placeholder="https://www.youtube.com/watch?v=...")
         
-        song_url = st.text_input("Enter Song or YouTube URL:")
-        
-        if st.button("⚡ Process & Remove Music", type="primary"):
-            if song_url:
-                with st.spinner(f"Filtering instrumental frequencies for Stage {stage_num}..."):
-                    processed_track = processor.process_track(song_url, stage=stage_num)
-                    time.sleep(1)
-                    st.success("Instrumental conversion complete!")
-                    
-                    if processed_track:
-                        st.audio(processed_track)
-                        # Option to send processed track straight into the mixer
-                        st.session_state["active_cleansed_audio"] = processed_track
+        if st.button("⚡ Extract Vocals & Cleanse Track", type="primary"):
+            if yt_url:
+                with st.spinner("Processing track with Demucs stem separation (or fetching cached version)..."):
+                    try:
+                        result = processor.process_yt_url(yt_url)
+                        if result and "storage_url" in result:
+                            processed_url = result["storage_url"]
+                            st.success(f"Track processed successfully: **{result.get('title', 'YouTube Track')}**")
+                            st.session_state["active_cleansed_audio"] = processed_url
+                    except Exception as e:
+                        st.error(f"Demucs processing failed: {e}")
+                        st.info("💡 Note: Demucs local stem separation requires FFmpeg/PyTorch installed on the host container.")
             else:
-                st.warning("Please provide a valid audio link to process.")
+                st.warning("Please enter a valid YouTube URL.")
 
     else:
-        st.markdown("### Ambient Soundscape Layering")
-        st.caption("Add soothing background ambience (rain, birds, white noise) to your audio.")
+        uploaded_file = st.file_uploader("Upload an MP3/WAV file:", type=["mp3", "wav", "m4a"])
         
-        # Default to recently cleansed audio if available, otherwise ask for source
-        default_source = st.session_state.get("active_cleansed_audio", "https://server8.mp3quran.net/afs/055.mp3")
-        mixer_input = st.text_input("Audio Source for Mixing:", value=default_source)
-        
-        if mixer_input:
-            render_mixer(source=mixer_input)
-        else:
-            st.info("Provide an audio link or convert a song first to use the mixer.")
+        if st.button("⚡ Extract Vocals & Cleanse File", type="primary"):
+            if uploaded_file:
+                with st.spinner("Separating vocal stems via Demucs..."):
+                    try:
+                        file_bytes = uploaded_file.getvalue()
+                        result = processor.process_audio(file_bytes, uploaded_file.name)
+                        if result and "storage_url" in result:
+                            processed_url = result["storage_url"]
+                            st.success(f"Vocal stem extracted successfully: **{result.get('title')}**")
+                            st.session_state["active_cleansed_audio"] = processed_url
+                    except Exception as e:
+                        st.error(f"Processing error: {e}")
+            else:
+                st.warning("Please upload an audio file first.")
 
+    # Render playback if track is processed or stored in session state
+    active_audio = st.session_state.get("active_cleansed_audio")
+    if active_audio:
+        st.divider()
+        st.markdown("### 🎧 Cleansed Vocal Stream")
+        st.audio(active_audio)
+        
+        st.divider()
+        st.markdown("### 🎛️ Layer Ambient Soundscape")
+        render_mixer(source=active_audio)
+        
             
 # TAB 2: Context-Aware Audio Replacements
 with tabs[1]:
