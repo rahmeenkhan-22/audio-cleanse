@@ -102,13 +102,24 @@ tabs = st.tabs(
 # TAB 1: Cleanse Engine & Mixer
 with tabs[0]:
     st.subheader("🎵 Audio Cleanse Processing Engine")
-
-    # Render custom vocal/instrumental mixer
-    render_mixer(stage=stage_num)
-
+    
+    # 1. URL / Audio Source Input
+    audio_url_input = st.text_input(
+        "Enter Audio or YouTube URL for Processing:",
+        value="https://server8.mp3quran.net/afs/055.mp3"
+    )
+    
     st.divider()
-
-    audio_url_input = st.text_input("Enter Audio or YouTube URL for Processing:")
+    
+    # 2. Render Ambient Soundscape Mixer passing the active audio source URL
+    if audio_url_input:
+        render_mixer(source=audio_url_input)
+    else:
+        st.info("Provide an audio link above to enable ambient soundscape mixing.")
+        
+    st.divider()
+    
+    # 3. Track Processing Trigger
     if st.button("Process Track"):
         if audio_url_input:
             with st.spinner("Processing audio layers..."):
@@ -121,7 +132,7 @@ with tabs[0]:
                     st.audio(processed_track)
         else:
             st.warning("Please provide a valid audio link.")
-
+            
 # TAB 2: Context-Aware Audio Replacements
 with tabs[1]:
     st.subheader("🎧 Context-Aware Audio Replacements")
