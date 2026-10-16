@@ -162,6 +162,7 @@ with tabs[1]:
         st.audio("https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaaseee/055.mp3")
 
 with tabs[2]:
+    analytics.render_analytics(db)
     st.subheader("📊 Your Craving & Mood Progress")
     try:
         response = db.client.table("mood_analytics").select("*").execute()
