@@ -109,7 +109,7 @@ with tabs[0]:
     
     processed_url = None
     
-   if input_type == "YouTube URL":
+    if input_type == "YouTube URL":
         yt_url = st.text_input("Enter YouTube Video / Audio Link:", placeholder="https://www.youtube.com/watch?v=...")
         
         if st.button("⚡ Extract Vocals & Cleanse Track", type="primary"):
@@ -158,7 +158,6 @@ with tabs[0]:
         st.divider()
         st.markdown("### 🎛️ Layer Ambient Soundscape")
         render_mixer(source=active_audio)
-
 
 # TAB 2: Context-Aware Audio Replacements
 with tabs[1]:
