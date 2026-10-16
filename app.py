@@ -133,33 +133,34 @@ with tabs[1]:
     st.subheader("🎧 Context-Aware Audio Replacements")
     activity = st.selectbox("What are you doing right now?", ["Working out", "Driving / Commuting", "Relaxing / Sleeping"])
     
-    # Map activity to vault category
+    # Map activity selection to catalog category (lowercase to match catalog/vault)
     category_map = {
-        "Working out": "Nasheed",
-        "Driving / Commuting": "Lectures",
-        "Relaxing / Sleeping": "Quran"
+        "Working out": "nasheed",
+        "Driving / Commuting": "podcast",
+        "Relaxing / Sleeping": "quran"
     }
     
     selected_category = category_map[activity]
-    st.markdown(f"**Recommended for {activity}:** ({selected_category} Selection)")
+    st.markdown(f"**Recommended for {activity}:** ({selected_category.title()} Selection)")
     
-    # Load tracks from Vault
-    vault_tracks = vault.load_vault(db, category=selected_category)
+    # Query vault passing the client, lowercase category, and trigger string
+    vault_tracks = vault.load_vault(
+        _client=db.client,
+        category=selected_category,
+        trigger=activity
+    )
     
     if vault_tracks:
         for track in vault_tracks:
             with st.container(border=True):
-                st.write(f"**{track.get('title', 'Untitled')}** — {track.get('reciter_artist', 'Unknown')}")
+                title = track.get('title') or track.get('name') or "Untitled Track"
+                creator = track.get('creator') or track.get('reciter_artist') or "Unknown Artist"
+                st.write(f"**{title}** — *{creator}*")
                 st.audio(track.get('audio_url'))
     else:
         st.info("No pre-loaded tracks found for this category yet. Showing default recommendations:")
-        if activity == "Working out":
-            st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-        elif activity == "Driving / Commuting":
-            st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3")
-        else:
-            st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3")
-            
+        st.audio("https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaaseee/055.mp3")
+
 with tabs[2]:
     st.subheader("📊 Your Craving & Mood Progress")
     try:
