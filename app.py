@@ -104,7 +104,7 @@ with tabs[0]:
     st.subheader("🎵 Audio Cleanse Processing Engine")
 
     # Render custom vocal/instrumental mixer
-    render_mixer(stage=stage_num, processor=processor)
+    render_mixer(stage=stage_num)
 
     st.divider()
 
