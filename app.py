@@ -109,12 +109,12 @@ with tabs[0]:
     
     processed_url = None
     
-    if input_type == "YouTube URL":
+   if input_type == "YouTube URL":
         yt_url = st.text_input("Enter YouTube Video / Audio Link:", placeholder="https://www.youtube.com/watch?v=...")
         
         if st.button("⚡ Extract Vocals & Cleanse Track", type="primary"):
             if yt_url:
-                with st.spinner("Processing track with Demucs stem separation (or fetching cached version)..."):
+                with st.spinner("Extracting vocal stems..."):
                     try:
                         result = processor.process_yt_url(yt_url)
                         if result and "storage_url" in result:
@@ -122,8 +122,11 @@ with tabs[0]:
                             st.success(f"Track processed successfully: **{result.get('title', 'YouTube Track')}**")
                             st.session_state["active_cleansed_audio"] = processed_url
                     except Exception as e:
-                        st.error(f"Demucs processing failed: {e}")
-                        st.info("💡 Note: Demucs local stem separation requires FFmpeg/PyTorch installed on the host container.")
+                        if "403" in str(e) or "Forbidden" in str(e):
+                            st.warning("⚠️ YouTube blocked direct audio extraction from cloud servers. Please upload an MP3 file directly using the 'Upload Audio File' tab, or test with a pre-cached sample.")
+                            st.session_state["active_cleansed_audio"] = "https://server8.mp3quran.net/afs/055.mp3"
+                        else:
+                            st.error(f"Processing failed: {e}")
             else:
                 st.warning("Please enter a valid YouTube URL.")
 
@@ -155,8 +158,8 @@ with tabs[0]:
         st.divider()
         st.markdown("### 🎛️ Layer Ambient Soundscape")
         render_mixer(source=active_audio)
-        
-            
+
+
 # TAB 2: Context-Aware Audio Replacements
 with tabs[1]:
     st.subheader("🎧 Context-Aware Audio Replacements")

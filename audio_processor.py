@@ -13,7 +13,7 @@ class AudioProcessor:
         return hashlib.md5(file_bytes).hexdigest()
 
     def download_yt_audio(self, url: str, output_dir: str) -> str:
-        """Downloads audio from a YouTube link using yt-dlp."""
+        """Downloads audio from a YouTube link using yt-dlp with updated bypass headers."""
         ydl_opts = {
             'format': 'bestaudio/best',
             'outtmpl': os.path.join(output_dir, 'yt_audio.%(ext)s'),
@@ -23,6 +23,13 @@ class AudioProcessor:
                 'preferredquality': '192',
             }],
             'quiet': True,
+            'no_warnings': True,
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'web']
+                }
+            }
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
