@@ -61,7 +61,12 @@ with st.sidebar:
         
         if submitted:
             # Standard test user UUID for local testing
-            db.log_mood_craving("00000000-0000-0000-0000-000000000000", craving, context, emotion)
+            db.log_mood(
+    craving_score=craving,
+    trigger_context=context,
+    emotional_state=emotion,
+    day_number=day_num  # or pass journey_day if you have a day slider variable
+)
             st.success("Mood log saved!")
 
 # Main Feature Area Based on Stage
