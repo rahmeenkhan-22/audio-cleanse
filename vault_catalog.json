@@ -1,0 +1,38 @@
+[
+  {
+    "id": "quran-sample-001",
+    "title": "REPLACE_ME: Surah title",
+    "creator": "REPLACE_ME: reciter",
+    "category": "quran",
+    "triggers": ["working_out", "driving", "relaxing", "sleeping"],
+    "stages": [3],
+    "audio_url": "https://REPLACE_ME.supabase.co/storage/v1/object/public/vault/quran-sample-001.mp3",
+    "duration_sec": 0,
+    "license_note": "REPLACE_ME: source + permission",
+    "is_active": false
+  },
+  {
+    "id": "nasheed-sample-001",
+    "title": "REPLACE_ME: vocal-only nasheed",
+    "creator": "REPLACE_ME: artist",
+    "category": "nasheed",
+    "triggers": ["working_out", "stressed", "bored"],
+    "stages": [2],
+    "audio_url": "https://REPLACE_ME.supabase.co/storage/v1/object/public/vault/nasheed-sample-001.mp3",
+    "duration_sec": 0,
+    "license_note": "REPLACE_ME: permission from artist/label",
+    "is_active": false
+  },
+  {
+    "id": "podcast-sample-001",
+    "title": "REPLACE_ME: Islamic history episode",
+    "creator": "REPLACE_ME: host",
+    "category": "podcast",
+    "triggers": ["driving"],
+    "stages": [2],
+    "audio_url": "https://REPLACE_ME.supabase.co/storage/v1/object/public/vault/podcast-sample-001.mp3",
+    "duration_sec": 0,
+    "license_note": "REPLACE_ME: permission/license",
+    "is_active": false
+  }
+]
