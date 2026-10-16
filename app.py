@@ -1,3 +1,6 @@
+"""
+app.py: Main entry point for the Audio Cleanse Streamlit application.
+"""
 import time
 import pandas as pd
 import streamlit as st
@@ -102,46 +105,64 @@ tabs = st.tabs(
 # TAB 1: Cleanse Engine & Mixer
 with tabs[0]:
     st.subheader("🎵 Audio Cleanse Processing Engine")
-    
-    # 1. Clear Operation Mode Selector
+
+    # Mode Selector
     engine_mode = st.radio(
         "Choose Operation Mode:",
         ["🎼 Convert / Remove Instrumental Music", "🎛️ Ambient Soundscape Mixer"],
-        horizontal=True
+        horizontal=True,
     )
-    
+
     st.divider()
-    
+
     if engine_mode == "🎼 Convert / Remove Instrumental Music":
         st.markdown("### Remove or Filter Instrumental Music")
-        st.caption("Submit an audio link or file to apply stage-based frequency dampening.")
-        
-        input_type = st.radio("Source Type:", ["Direct Audio URL", "Upload Audio File"], horizontal=True)
-        
-       if input_type == "Direct Audio URL":
+        st.caption(
+            "Submit an audio link or file to apply stage-based frequency dampening."
+        )
+
+        input_type = st.radio(
+            "Source Type:", ["Direct Audio URL", "Upload Audio File"], horizontal=True
+        )
+
+        if input_type == "Direct Audio URL":
             song_url = st.text_input(
-                "Enter Audio Link (MP3/WAV/YouTube URL):", 
-                value="https://server8.mp3quran.net/afs/055.mp3"
+                "Enter Audio Link (MP3/WAV/YouTube URL):",
+                value="https://server8.mp3quran.net/afs/055.mp3",
             )
             if st.button("⚡ Process & Dampen Music", type="primary"):
                 if song_url:
-                    with st.spinner(f"Filtering instrumental frequencies for Stage {stage_num}..."):
-                        processed_bytes = processor.process_track(song_url, stage=stage_num)
+                    with st.spinner(
+                        f"Filtering instrumental frequencies for Stage {stage_num}..."
+                    ):
+                        processed_bytes = processor.process_track(
+                            song_url, stage=stage_num
+                        )
                         if processed_bytes:
                             st.success(f"Processing complete for Stage {stage_num}!")
                             st.audio(processed_bytes, format="audio/mp3")
                             st.session_state["active_cleansed_audio"] = processed_bytes
                         else:
-                            st.warning("⚠️ Could not extract streaming audio from that URL. YouTube often blocks cloud server IPs.")
-                            st.info("💡 **Recommended fix:** Select 'Upload Audio File' above to process your MP3/WAV file directly, or try a direct audio link (.mp3/.wav).")
+                            st.warning(
+                                "⚠️ Could not extract streaming audio from that URL."
+                            )
+                            st.info(
+                                "💡 Try selecting 'Upload Audio File' above to process your file directly."
+                            )
                 else:
                     st.warning("Please provide a valid audio URL.")
         else:
-            uploaded_file = st.file_uploader("Upload Audio File (MP3/WAV/M4A):", type=["mp3", "wav", "m4a"])
+            uploaded_file = st.file_uploader(
+                "Upload Audio File (MP3/WAV/M4A):", type=["mp3", "wav", "m4a"]
+            )
             if st.button("⚡ Process Uploaded File", type="primary"):
                 if uploaded_file:
-                    with st.spinner(f"Filtering instrumental frequencies for Stage {stage_num}..."):
-                        processed_bytes = processor.process_track(uploaded_file.getvalue(), stage=stage_num)
+                    with st.spinner(
+                        f"Filtering instrumental frequencies for Stage {stage_num}..."
+                    ):
+                        processed_bytes = processor.process_track(
+                            uploaded_file.getvalue(), stage=stage_num
+                        )
                         if processed_bytes:
                             st.success(f"Processing complete for Stage {stage_num}!")
                             st.audio(processed_bytes, format="audio/mp3")
@@ -153,17 +174,20 @@ with tabs[0]:
 
     else:
         st.markdown("### Ambient Soundscape Layering")
-        st.caption("Add background soundscapes (rain, nature, ambient noise) over your audio.")
-        
-        # Use previously cleansed audio if available, otherwise default sample
-        default_source = st.session_state.get("active_cleansed_audio", "https://server8.mp3quran.net/afs/055.mp3")
-        
+        st.caption(
+            "Add background soundscapes (rain, nature, ambient noise) over your audio."
+        )
+
+        default_source = st.session_state.get(
+            "active_cleansed_audio", "https://server8.mp3quran.net/afs/055.mp3"
+        )
+
         if isinstance(default_source, str):
             mixer_input = st.text_input("Audio Source for Mixing:", value=default_source)
         else:
             mixer_input = default_source
             st.info("Using your newly cleansed track from the previous step.")
-            
+
         render_mixer(source=mixer_input)
 
 # TAB 2: Context-Aware Audio Replacements
@@ -174,7 +198,6 @@ with tabs[1]:
         ["Working out", "Driving / Commuting", "Relaxing / Sleeping"],
     )
 
-    # Category mapping (lowercase to match catalog/vault)
     category_map = {
         "Working out": "nasheed",
         "Driving / Commuting": "podcast",
@@ -186,7 +209,6 @@ with tabs[1]:
         f"**Recommended for {activity}:** ({selected_category.title()} Selection)"
     )
 
-    # Load replacement tracks from Supabase or local vault catalog
     vault_tracks = vault.load_vault(
         _client=db.client, category=selected_category, trigger=activity
     )
