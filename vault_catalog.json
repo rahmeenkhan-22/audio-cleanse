@@ -25,26 +25,26 @@
   },
   {
     "id": "nasheed-001",
-    "title": "Maula Ya Salli Wa Sallim",
-    "creator": "Traditional Vocal",
+    "title": "Surah Al-Kahf (Vocal Recitation)",
+    "creator": "Abu Bakr Al-Shatri",
     "category": "nasheed",
     "triggers": ["Working out", "Driving / Commuting"],
     "stages": [1, 2, 3],
-    "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    "duration_sec": 240,
-    "license_note": "Sample Track",
+    "audio_url": "https://download.quranicaudio.com/quran/abu_bakr_ash-shaatree/018.mp3",
+    "duration_sec": 1400,
+    "license_note": "Public Domain / QuranicAudio",
     "is_active": true
   },
   {
     "id": "podcast-001",
-    "title": "Purification of the Heart",
-    "creator": "Hamza Yusuf",
+    "title": "Surah Yasin (Vocal Recitation)",
+    "creator": "Maher Al-Muaiqly",
     "category": "podcast",
     "triggers": ["Driving / Commuting"],
     "stages": [1, 2, 3],
-    "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    "duration_sec": 1800,
-    "license_note": "Public Lecture",
+    "audio_url": "https://download.quranicaudio.com/quran/maher_al_muaiqly/036.mp3",
+    "duration_sec": 720,
+    "license_note": "Public Domain / QuranicAudio",
     "is_active": true
   }
 ]
