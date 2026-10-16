@@ -103,35 +103,48 @@ tabs = st.tabs(
 with tabs[0]:
     st.subheader("🎵 Audio Cleanse Processing Engine")
     
-    # 1. URL / Audio Source Input
-    audio_url_input = st.text_input(
-        "Enter Audio or YouTube URL for Processing:",
-        value="https://server8.mp3quran.net/afs/055.mp3"
+    # Mode selection for user workflow
+    engine_mode = st.radio(
+        "Choose Operation:",
+        ["🎼 Convert / Remove Instrumental Music", "🎛️ Ambient Soundscape Mixer"],
+        horizontal=True
     )
     
     st.divider()
     
-    # 2. Render Ambient Soundscape Mixer passing the active audio source URL
-    if audio_url_input:
-        render_mixer(source=audio_url_input)
-    else:
-        st.info("Provide an audio link above to enable ambient soundscape mixing.")
+    if engine_mode == "🎼 Convert / Remove Instrumental Music":
+        st.markdown("### Remove or Dampen Instrumental Music")
+        st.caption("Submit a song link to isolate vocals or apply stage-based frequency dampening.")
         
-    st.divider()
-    
-    # 3. Track Processing Trigger
-    if st.button("Process Track"):
-        if audio_url_input:
-            with st.spinner("Processing audio layers..."):
-                processed_track = processor.process_track(
-                    audio_url_input, stage=stage_num
-                )
-                time.sleep(1)
-                st.success("Track processed successfully!")
-                if processed_track:
-                    st.audio(processed_track)
+        song_url = st.text_input("Enter Song or YouTube URL:")
+        
+        if st.button("⚡ Process & Remove Music", type="primary"):
+            if song_url:
+                with st.spinner(f"Filtering instrumental frequencies for Stage {stage_num}..."):
+                    processed_track = processor.process_track(song_url, stage=stage_num)
+                    time.sleep(1)
+                    st.success("Instrumental conversion complete!")
+                    
+                    if processed_track:
+                        st.audio(processed_track)
+                        # Option to send processed track straight into the mixer
+                        st.session_state["active_cleansed_audio"] = processed_track
+            else:
+                st.warning("Please provide a valid audio link to process.")
+
+    else:
+        st.markdown("### Ambient Soundscape Layering")
+        st.caption("Add soothing background ambience (rain, birds, white noise) to your audio.")
+        
+        # Default to recently cleansed audio if available, otherwise ask for source
+        default_source = st.session_state.get("active_cleansed_audio", "https://server8.mp3quran.net/afs/055.mp3")
+        mixer_input = st.text_input("Audio Source for Mixing:", value=default_source)
+        
+        if mixer_input:
+            render_mixer(source=mixer_input)
         else:
-            st.warning("Please provide a valid audio link.")
+            st.info("Provide an audio link or convert a song first to use the mixer.")
+
             
 # TAB 2: Context-Aware Audio Replacements
 with tabs[1]:
