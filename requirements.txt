@@ -8,3 +8,4 @@ plotly
 pydub
 yt-dlp
 audioop-lts
+scipy
