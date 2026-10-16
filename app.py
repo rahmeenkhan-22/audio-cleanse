@@ -1,177 +1,169 @@
-import streamlit as st
-import vault
-import pandas as pd
 import time
-from database import DatabaseManager
-from audio_processor import AudioProcessor
-import analytics
-from ui_components import render_mixer, pause_and_reflect, reset_pause
+import pandas as pd
+import streamlit as st
 
-# Page Configuration
+import analytics
+from audio_processor import AudioProcessor
+from database import DatabaseManager
+import ui_components
+from ui_components import pause_and_reflect, render_mixer, reset_pause
+import vault
+
+# --- Page Configuration ---
 st.set_page_config(
-    page_title="Audio Cleanse - Music Transition App",
-    page_icon="🎵",
-    layout="wide"
+    page_title="Audio Cleanse",
+    page_icon="🛡️",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-# Initialize Core Services
+# --- Database & Service Initialization ---
 db = DatabaseManager()
 processor = AudioProcessor()
 
-# Session State Initialization
-if "user_day" not in st.session_state:
-    st.session_state.user_day = 1
+# --- SIDEBAR: User Controls & Mood Log ---
+st.sidebar.title("⚙️ User Controls")
 
-# Calculate Current Stage
-if st.session_state.user_day <= 14:
-    current_stage = 1
-elif st.session_state.user_day <= 35:
-    current_stage = 2
-else:
-    current_stage = 3
+# Journey Day Simulation
+journey_day = st.sidebar.slider(
+    "Simulate Journey Day", min_value=1, max_value=40, value=1
+)
 
-# App Header & Stage Progress Bar
+st.sidebar.divider()
+
+st.sidebar.header("📝 Daily Craving & Mood Log")
+
+# Logging inputs
+craving = st.sidebar.slider(
+    "Music Craving Intensity (1-10)", min_value=1, max_value=10, value=5
+)
+
+context = st.sidebar.selectbox(
+    "Trigger Context",
+    [
+        "Driving",
+        "Working out",
+        "Relaxing / Sleeping",
+        "Boredom",
+        "Stress",
+        "Socializing",
+    ],
+)
+
+emotion = st.sidebar.selectbox(
+    "Emotional State", ["Anxious", "Tired", "Energetic", "Sad", "Stressed", "Calm"]
+)
+
+if st.sidebar.button("Log Entry"):
+    success = db.log_mood(
+        craving_score=craving,
+        trigger_context=context,
+        emotional_state=emotion,
+        day_number=journey_day,
+    )
+    if success:
+        st.sidebar.success("Mood log saved!")
+        st.rerun()
+    else:
+        st.sidebar.error("Failed to save log. Please try again.")
+
+# --- MAIN APP UI ---
 st.title("🛡️ Audio Cleanse")
 st.caption("A guided journey to transition away from instrumental music.")
 
-col1, col2, col3 = st.columns(3)
-col1.metric("Journey Day", f"Day {st.session_state.user_day}")
-col2.metric("Current Stage", f"Stage {current_stage}")
-col3.metric("Status", "Active" if current_stage < 3 else "Pure Dhikr")
+# Current Status Headers
+col_day, col_stage, col_status = st.columns(3)
 
-progress_val = min(st.session_state.user_day / 36, 1.0)
-st.progress(progress_val)
+# Calculate Stage based on Journey Day
+if journey_day <= 10:
+    stage_num = 1
+    stage_status = "Active"
+elif journey_day <= 25:
+    stage_num = 2
+    stage_status = "Transitioning"
+else:
+    stage_num = 3
+    stage_status = "Pure Dhikr"
 
-st.divider()
+col_day.metric("Journey Day", f"Day {journey_day}")
+col_stage.metric("Current Stage", f"Stage {stage_num}")
+col_status.metric("Status", stage_status)
 
-# Sidebar: Stage Overrides & Mood Logging
-with st.sidebar:
-    st.header("⚙️ User Controls")
-    
-    # Day Simulator (For testing stage unlocks)
-    st.session_state.user_day = st.slider("Simulate Journey Day", 1, 40, st.session_state.user_day)
-    
-    st.divider()
-    st.subheader("📝 Daily Craving & Mood Log")
-    with st.form("mood_form"):
-        craving = st.slider("Music Craving Intensity (1-10)", 1, 10, 5)
-        context = st.selectbox("Trigger Context", ["Driving", "Working out", "Stressed", "Bored", "Relaxing"])
-        emotion = st.selectbox("Emotional State", ["Anxious", "Calm", "Energetic", "Tired", "Overwhelmed"])
-        submitted = st.form_submit_button("Log Entry")
-        
-        if submitted:
-            # Standard test user UUID for local testing
-            db.log_mood(
-    craving_score=craving,
-    trigger_context=context,
-    emotional_state=emotion
+st.progress(min(journey_day / 40.0, 1.0))
+
+# --- Pause & Reflect Exercise ---
+pause_and_reflect()
+
+# --- APP TABS ---
+tabs = st.tabs(
+    ["🎵 Audio Cleanse Engine", "🎧 Replacing the Trigger", "📊 Mood Analytics"]
 )
-            st.success("Mood log saved!")
 
-# Main Feature Area Based on Stage
-tabs = st.tabs(["🎵 Audio Cleanse Engine", "🎧 Replacing the Trigger", "📊 Mood Analytics"])
-
+# TAB 1: Cleanse Engine & Mixer
 with tabs[0]:
-    if current_stage == 1:
-        st.subheader("Stage 1: AI Vocal Extraction Engine (Days 1–14)")
-        st.info("Upload an audio file or paste a YouTube URL. Demucs AI will strip background instruments and isolate vocals.")
-        
-        input_type = st.radio("Choose Input Method", ["File Upload", "Paste YouTube URL"])
-        
-        if input_type == "File Upload":
-            uploaded_file = st.file_uploader("Upload Audio Track (.mp3, .wav)", type=["mp3", "wav"])
-            if uploaded_file is not None and st.button("Extract Vocals from File"):
-                with st.spinner("Processing audio with Demucs AI..."):
-                    try:
-                        result = processor.process_audio(uploaded_file.read(), uploaded_file.name)
-                        st.success(f"Extraction complete! (Source: {result['status']})")
-                        st.audio(result["storage_url"])
-                    except Exception as e:
-                        st.error(f"Error processing audio: {e}")
-                    
+    st.subheader("🎵 Audio Cleanse Processing Engine")
+
+    # Render custom vocal/instrumental mixer
+    render_mixer()
+
+    st.divider()
+
+    audio_url_input = st.text_input("Enter Audio or YouTube URL for Processing:")
+    if st.button("Process Track"):
+        if audio_url_input:
+            with st.spinner("Processing audio layers..."):
+                processed_track = processor.process_track(
+                    audio_url_input, stage=stage_num
+                )
+                time.sleep(1)
+                st.success("Track processed successfully!")
+                if processed_track:
+                    st.audio(processed_track)
         else:
-            yt_url = st.text_input("Paste YouTube Video URL:")
-            if yt_url and st.button("Extract Vocals from Link"):
-                with st.spinner("Downloading YouTube audio and running Demucs..."):
-                    try:
-                        result = processor.process_yt_url(yt_url)
-                        st.success(f"Extraction complete! (Source: {result['status']})")
-                        st.audio(result["storage_url"])
-                    except Exception as e:
-                        st.error(f"Error processing YouTube video: {e}")
+            st.warning("Please provide a valid audio link.")
 
-    elif current_stage == 2:
-        st.subheader("Stage 2: Throttled Conversion & Transition (Days 15–35)")
-        st.warning("Conversion power is throttled. Take a moment to reflect before processing new audio.")
-
-        if pause_and_reflect():
-            input_type = st.radio("Choose Input Method", ["File Upload", "Paste YouTube URL"], key="stage2_input")
-
-            if input_type == "File Upload":
-                uploaded_file = st.file_uploader("Upload Audio Track (.mp3, .wav)", type=["mp3", "wav"], key="stage2_file")
-                if uploaded_file and st.button("Proceed with Throttled File Extraction"):
-                    with st.spinner("Extracting..."):
-                        try:
-                            result = processor.process_audio(uploaded_file.read(), uploaded_file.name)
-                            st.audio(result["storage_url"])
-                            reset_pause()
-                        except Exception as e:
-                            st.error(f"Error: {e}")
-            else:
-                yt_url = st.text_input("Paste YouTube Video URL:", key="stage2_yt")
-                if yt_url and st.button("Proceed with Throttled Link Extraction"):
-                    with st.spinner("Extracting from YouTube..."):
-                        try:
-                            result = processor.process_yt_url(yt_url)
-                            st.audio(result["storage_url"])
-                            reset_pause()
-                        except Exception as e:
-                            st.error(f"Error: {e}")
-
-    else:
-        st.subheader("Stage 3: Pure Quran & Dhikr Mode (Day 36+)")
-        st.error("Audio converter is locked. You have reached Stage 3: Pure Dhikr!")
-        st.success("Congratulations on reaching full transition! Explore vocal-only recitations and ambient soundscapes in the 'Replacing the Trigger' tab.")
-
+# TAB 2: Context-Aware Audio Replacements
 with tabs[1]:
     st.subheader("🎧 Context-Aware Audio Replacements")
-    activity = st.selectbox("What are you doing right now?", ["Working out", "Driving / Commuting", "Relaxing / Sleeping"])
-    
-    # Map activity selection to catalog category (lowercase to match catalog/vault)
+    activity = st.selectbox(
+        "What are you doing right now?",
+        ["Working out", "Driving / Commuting", "Relaxing / Sleeping"],
+    )
+
+    # Category mapping (lowercase to match catalog/vault)
     category_map = {
         "Working out": "nasheed",
         "Driving / Commuting": "podcast",
-        "Relaxing / Sleeping": "quran"
+        "Relaxing / Sleeping": "quran",
     }
-    
+
     selected_category = category_map[activity]
-    st.markdown(f"**Recommended for {activity}:** ({selected_category.title()} Selection)")
-    
-    # Query vault passing the client, lowercase category, and trigger string
-    vault_tracks = vault.load_vault(
-        _client=db.client,
-        category=selected_category,
-        trigger=activity
+    st.markdown(
+        f"**Recommended for {activity}:** ({selected_category.title()} Selection)"
     )
-    
+
+    # Load replacement tracks from Supabase or local vault catalog
+    vault_tracks = vault.load_vault(
+        _client=db.client, category=selected_category, trigger=activity
+    )
+
     if vault_tracks:
         for track in vault_tracks:
             with st.container(border=True):
-                title = track.get('title') or track.get('name') or "Untitled Track"
-                creator = track.get('creator') or track.get('reciter_artist') or "Unknown Artist"
+                title = track.get("title") or track.get("name") or "Untitled Track"
+                creator = (
+                    track.get("creator")
+                    or track.get("reciter_artist")
+                    or "Unknown Artist"
+                )
                 st.write(f"**{title}** — *{creator}*")
-                st.audio(track.get('audio_url'))
+                st.audio(track.get("audio_url"))
     else:
-        st.info("No pre-loaded tracks found for this category yet. Showing default recommendations:")
-        st.audio("https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaaseee/055.mp3")
+        st.info(
+            "No pre-loaded tracks found for this category yet. Showing default recommendations:"
+        )
+        st.audio("https://server8.mp3quran.net/afs/055.mp3")
 
+# TAB 3: Live Mood Analytics
 with tabs[2]:
     analytics.render_analytics(db)
-    st.subheader("📊 Your Craving & Mood Progress")
-    try:
-        response = db.client.table("mood_analytics").select("*").execute()
-        df = pd.DataFrame(response.data)
-        render_mood_analytics(df)
-    except Exception as e:
-        st.info("Log your daily mood in the sidebar to generate graphs!")
-
