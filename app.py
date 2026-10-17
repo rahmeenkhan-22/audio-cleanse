@@ -13,6 +13,7 @@ from database import DatabaseManager
 import ui_components
 from ui_components import pause_and_reflect, render_mixer, reset_pause
 import vault
+import stage3
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -113,7 +114,7 @@ st.progress(min(journey_day / 40.0, 1.0))
 
 # --- APP TABS ---
 tabs = st.tabs(
-    ["🎵 Audio Cleanse Engine", "🎧 Replacing the Trigger", "📊 Mood Analytics"]
+    ["🎵 Audio Cleanse Engine", "🎧 Replacing the Trigger", "📊 Mood Analytics", "🌙 Quran & Dhikr"]
 )
 
 # TAB 1: Cleanse Engine & Mixer
@@ -141,7 +142,7 @@ with tabs[0]:
         else:
             allowed = False
             st.error(
-                "🔒 The audio converter is locked in Stage 3. Explore the 'Replacing the Trigger' tab instead."
+                "🔒 The audio converter is locked in Stage 3. Open the '🌙 Quran & Dhikr' tab instead."
             )
 
         if allowed:
@@ -270,3 +271,7 @@ with tabs[1]:
 # TAB 3: Live Mood Analytics (only the signed-in user's own entries)
 with tabs[2]:
     analytics.render_analytics(_UserDB())
+
+# TAB 4: Quran player & Dhikr counter
+with tabs[3]:
+    stage3.render_quran_and_dhikr()
