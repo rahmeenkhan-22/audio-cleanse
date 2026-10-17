@@ -16,13 +16,13 @@ import vault
 
 # --- Page Configuration ---
 st.set_page_config(
-    if not render_auth_gate():
-    st.stop()
     page_title="Audio Cleanse",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+if not render_auth_gate():
+    st.stop()
 
 # --- Database & Service Initialization ---
 db = DatabaseManager()
