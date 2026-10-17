@@ -111,9 +111,6 @@ col_status.metric("Status", stage_status)
 
 st.progress(min(journey_day / 40.0, 1.0))
 
-# --- Pause & Reflect Exercise ---
-pause_and_reflect()
-
 # --- APP TABS ---
 tabs = st.tabs(
     ["🎵 Audio Cleanse Engine", "🎧 Replacing the Trigger", "📊 Mood Analytics"]
@@ -133,61 +130,84 @@ with tabs[0]:
     st.divider()
 
     if engine_mode == "🎼 Convert / Remove Instrumental Music":
-        st.markdown("### Remove or Filter Instrumental Music")
-        st.caption(
-            "Submit an audio link or file to apply stage-based frequency dampening."
-        )
-
-        input_type = st.radio(
-            "Source Type:", ["Direct Audio URL", "Upload Audio File"], horizontal=True
-        )
-
-        if input_type == "Direct Audio URL":
-            song_url = st.text_input(
-                "Enter a direct audio link (MP3/WAV):",
-                value="https://server8.mp3quran.net/afs/055.mp3",
+        # --- Stage gate: S1 free, S2 needs Pause & Reflect, S3 locked ---
+        if stage_num == 1:
+            allowed = True
+        elif stage_num == 2:
+            st.warning(
+                "Stage 2: conversion is throttled. Take a moment to reflect before processing new audio."
             )
-            if st.button("⚡ Process & Dampen Music", type="primary"):
-                if song_url:
-                    with st.spinner(
-                        f"Filtering instrumental frequencies for Stage {stage_num}..."
-                    ):
-                        processed_bytes = processor.process_track(
-                            song_url, stage=stage_num
-                        )
-                        if processed_bytes:
-                            st.success(f"Processing complete for Stage {stage_num}!")
-                            st.audio(processed_bytes, format="audio/mp3")
-                            st.session_state["active_cleansed_audio"] = processed_bytes
-                        else:
-                            st.warning(
-                                "⚠️ Could not fetch audio from that link. It must be a direct MP3/WAV link."
-                            )
-                            st.info(
-                                "💡 Try selecting 'Upload Audio File' above to process your file directly."
-                            )
-                else:
-                    st.warning("Please provide a valid audio URL.")
+            allowed = pause_and_reflect()
         else:
-            uploaded_file = st.file_uploader(
-                "Upload Audio File (MP3/WAV/M4A):", type=["mp3", "wav", "m4a"]
+            allowed = False
+            st.error(
+                "🔒 The audio converter is locked in Stage 3. Explore the 'Replacing the Trigger' tab instead."
             )
-            if st.button("⚡ Process Uploaded File", type="primary"):
-                if uploaded_file:
-                    with st.spinner(
-                        f"Filtering instrumental frequencies for Stage {stage_num}..."
-                    ):
-                        processed_bytes = processor.process_track(
-                            uploaded_file.getvalue(), stage=stage_num
-                        )
-                        if processed_bytes:
-                            st.success(f"Processing complete for Stage {stage_num}!")
-                            st.audio(processed_bytes, format="audio/mp3")
-                            st.session_state["active_cleansed_audio"] = processed_bytes
-                        else:
-                            st.error("Failed to process the uploaded file.")
-                else:
-                    st.warning("Please upload an audio file first.")
+
+        if allowed:
+            st.markdown("### Remove or Filter Instrumental Music")
+            st.caption(
+                "Submit an audio link or file to apply stage-based frequency dampening."
+            )
+
+            input_type = st.radio(
+                "Source Type:", ["Direct Audio URL", "Upload Audio File"], horizontal=True
+            )
+
+            if input_type == "Direct Audio URL":
+                song_url = st.text_input(
+                    "Enter a direct audio link (MP3/WAV):",
+                    value="https://server8.mp3quran.net/afs/055.mp3",
+                )
+                if st.button("⚡ Process & Dampen Music", type="primary"):
+                    if song_url:
+                        with st.spinner(
+                            f"Filtering instrumental frequencies for Stage {stage_num}..."
+                        ):
+                            processed_bytes = processor.process_track(
+                                song_url, stage=stage_num
+                            )
+                            if processed_bytes:
+                                st.success(f"Processing complete for Stage {stage_num}!")
+                                st.audio(processed_bytes, format="audio/mp3")
+                                st.session_state["active_cleansed_audio"] = processed_bytes
+                                if stage_num == 2:
+                                    reset_pause()   # each conversion needs a fresh pause
+                            else:
+                                st.warning(
+                                    "⚠️ Could not fetch audio from that link. It must be a direct MP3/WAV link."
+                                )
+                                st.info(
+                                    "💡 Try selecting 'Upload Audio File' above to process your file directly."
+                                )
+                    else:
+                        st.warning("Please provide a valid audio URL.")
+            else:
+                uploaded_file = st.file_uploader(
+                    "Upload Audio File (MP3/WAV/M4A):", type=["mp3", "wav", "m4a"]
+                )
+                if st.button("⚡ Process Uploaded File", type="primary"):
+                    if uploaded_file:
+                        with st.spinner(
+                            f"Filtering instrumental frequencies for Stage {stage_num}..."
+                        ):
+                            processed_bytes = processor.process_track(
+                                uploaded_file.getvalue(), stage=stage_num
+                            )
+                            if processed_bytes:
+                                st.success(f"Processing complete for Stage {stage_num}!")
+                                st.audio(processed_bytes, format="audio/mp3")
+                                st.session_state["active_cleansed_audio"] = processed_bytes
+                                if stage_num == 2:
+                                    reset_pause()   # each conversion needs a fresh pause
+                            else:
+                                st.error("Failed to process the uploaded file.")
+                    else:
+                        st.warning("Please upload an audio file first.")
+
+        elif stage_num == 2 and isinstance(st.session_state.get("active_cleansed_audio"), bytes):
+            st.caption("Your last converted track:")
+            st.audio(st.session_state["active_cleansed_audio"], format="audio/mp3")
 
     else:
         st.markdown("### Ambient Soundscape Layering")
