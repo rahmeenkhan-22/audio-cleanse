@@ -67,15 +67,15 @@ class AudioProcessor:
 
             # 2. Stage-based DSP Filtering
             if stage == 1:
-                filtered = high_pass_filter(audio, cutoff=200)
+                filtered = high_pass_filter(audio, 200)
                 filtered = filtered - 1.5
             elif stage == 2:
-                filtered = high_pass_filter(audio, cutoff=300)
-                filtered = low_pass_filter(filtered, cutoff=3400)
+                filtered = high_pass_filter(audio, 300)
+                filtered = low_pass_filter(filtered, 3400)
                 filtered = filtered - 3.0
             else:
-                filtered = high_pass_filter(audio, cutoff=400)
-                filtered = low_pass_filter(filtered, cutoff=3000)
+                filtered = high_pass_filter(audio, 400)
+                filtered = low_pass_filter(filtered, 3000)
                 filtered = filtered - 5.0
 
             # 3. Export to MP3 buffer
