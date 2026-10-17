@@ -6,7 +6,7 @@ import pandas as pd
 import static_ffmpeg
 static_ffmpeg.add_paths(weak=True)
 import streamlit as st
-from auth import render_auth_gate
+from auth import render_auth_gate, save_mood, load_moods
 import analytics
 from audio_processor import AudioProcessor
 from database import DatabaseManager
@@ -21,12 +21,25 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# --- Login gate: nothing below runs unless the user is signed in ---
 if not render_auth_gate():
     st.stop()
 
 # --- Database & Service Initialization ---
 db = DatabaseManager()
 processor = AudioProcessor()
+
+
+class _UserDB:
+    """Wraps the shared DB so analytics only ever sees the logged-in user's own entries."""
+
+    def fetch_mood_logs(self, *args, **kwargs):
+        return load_moods()
+
+    def __getattr__(self, name):
+        return getattr(db, name)
+
 
 # --- SIDEBAR: User Controls & Mood Log ---
 st.sidebar.title("⚙️ User Controls")
@@ -62,7 +75,7 @@ emotion = st.sidebar.selectbox(
 )
 
 if st.sidebar.button("Log Entry"):
-    success = db.log_mood(
+    success = save_mood(
         craving_score=craving,
         trigger_context=context,
         emotional_state=emotion,
@@ -131,7 +144,7 @@ with tabs[0]:
 
         if input_type == "Direct Audio URL":
             song_url = st.text_input(
-                "Enter Audio Link (MP3/WAV/YouTube URL):",
+                "Enter a direct audio link (MP3/WAV):",
                 value="https://server8.mp3quran.net/afs/055.mp3",
             )
             if st.button("⚡ Process & Dampen Music", type="primary"):
@@ -148,7 +161,7 @@ with tabs[0]:
                             st.session_state["active_cleansed_audio"] = processed_bytes
                         else:
                             st.warning(
-                                "⚠️ Could not extract streaming audio from that URL."
+                                "⚠️ Could not fetch audio from that link. It must be a direct MP3/WAV link."
                             )
                             st.info(
                                 "💡 Try selecting 'Upload Audio File' above to process your file directly."
@@ -234,6 +247,6 @@ with tabs[1]:
         )
         st.audio("https://server8.mp3quran.net/afs/055.mp3")
 
-# TAB 3: Live Mood Analytics
+# TAB 3: Live Mood Analytics (only the signed-in user's own entries)
 with tabs[2]:
-    analytics.render_analytics(db)
+    analytics.render_analytics(_UserDB())
