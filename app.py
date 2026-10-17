@@ -3,6 +3,8 @@ app.py: Main entry point for the Audio Cleanse Streamlit application.
 """
 import time
 import pandas as pd
+import static_ffmpeg
+static_ffmpeg.add_paths(weak=True)
 import streamlit as st
 
 import analytics
