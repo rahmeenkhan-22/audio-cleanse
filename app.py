@@ -6,7 +6,7 @@ import pandas as pd
 import static_ffmpeg
 static_ffmpeg.add_paths(weak=True)
 import streamlit as st
-
+from auth import render_auth_gate
 import analytics
 from audio_processor import AudioProcessor
 from database import DatabaseManager
@@ -16,6 +16,8 @@ import vault
 
 # --- Page Configuration ---
 st.set_page_config(
+    if not render_auth_gate():
+    st.stop()
     page_title="Audio Cleanse",
     page_icon="🛡️",
     layout="wide",
